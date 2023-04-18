@@ -10,6 +10,8 @@
   let qNumber = 0;
   let answers = [];
   let score = 0;
+  let feedback = null;
+  let isAnswered = false;
 
   onMount(async () => {
     try {
@@ -39,43 +41,58 @@
   };
 
   const getAnswers = (question) => {
-    answers = question.incorrect_answers;
+    answers = question.incorrect_answers.map((answer) => {
+      return { text: answer, isCorrect: false };
+    });
     const randomIndex = Math.floor(Math.random() * (answers.length + 1));
 
-    answers.splice(randomIndex, 0, question.correct_answer);
+    answers.splice(randomIndex, 0, {
+      text: question.correct_answer,
+      isCorrect: true,
+    });
   };
 
   const checkAnswer = (answer) => {
-    if (answer === questions[qNumber].correct_answer) {
-      console.log("correct!");
+    isAnswered = true
+    answer.isChosen = true
+    if (answer.isCorrect === true) {
+      feedback = "Correct!";
       score++;
     } else {
-      console.log("incorrect...");
+      feedback = "Incorrect...";
     }
+  };
+
+  const nextQuestion = () => {
+    isAnswered = false
+    feedback = null;
     qNumber++;
     if (qNumber < 10) {
       getAnswers(questions[qNumber]);
     }
   };
 
-  function htmlUnescape(str) {
+  function htmlReplace(str) {
     return str
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#039;', "'")  
-        .replaceAll('&rsquo;', "'") 
-        .replaceAll('&amp;', "'")
-        .replaceAll('&oacute;', "ó")
-        .replaceAll('&Oacute;', "Ó")
-        .replaceAll('&hellip;', '…')
-        .replaceAll('&ldquo;', '"')
-        .replaceAll('&rdquo;', '"')
-        .replaceAll('&Eacute;', 'É')
-        .replaceAll('&eacute;', 'é')
-}
+      .replaceAll("&quot;", '"')
+      .replaceAll("&#039;", "'")
+      .replaceAll("&rsquo;", "'")
+      .replaceAll("&amp;", "'")
+      .replaceAll("&oacute;", "ó")
+      .replaceAll("&Oacute;", "Ó")
+      .replaceAll("&hellip;", "…")
+      .replaceAll("&ldquo;", '"')
+      .replaceAll("&rdquo;", '"')
+      .replaceAll("&Eacute;", "É")
+      .replaceAll("&eacute;", "é")
+      .replaceAll("&aacute;", "á")
+      .replaceAll("&Aaute;", "Á")
+      .replaceAll("&shy;", "");
+  }
 </script>
 
 <main>
-  <h1>Trivia!</h1>
+  <h1>TRIVIA</h1>
   {#if !questions}
     <form on:submit|preventDefault={startGame}>
       <label for="difficulty">Choose difficulty:</label>
@@ -92,18 +109,28 @@
         {/each}
       </select>
 
-      <button type="submit">Let's Play!</button>
+      <button type="submit" class="lets-play">Let's Play!</button>
     </form>
   {:else}
     <div>
       {#if qNumber < 10}
-        <h2>{htmlUnescape(questions[qNumber].question)}</h2>
-        <div>
+        <p>Question {qNumber + 1} of 10</p>
+        <h2>{htmlReplace(questions[qNumber].question)}</h2>
+        <div class="answer-buttons">
           {#each answers as answer}
-            <button on:click={() => checkAnswer(answer)}>{htmlUnescape(answer)}</button>
+            {#if isAnswered}
+              <button class="isAnswered" class:btn-correct={answer.isCorrect} class:btn-incorrect={!answer.isCorrect} class:btn-chosen={answer.isChosen}>{htmlReplace(answer.text)}</button>
+            {:else}
+              <button on:click={() => checkAnswer(answer)}
+                >{htmlReplace(answer.text)}</button
+              >
+            {/if}
           {/each}
         </div>
-        <p>Question {qNumber + 1} of 10</p>
+        {#if feedback}
+          <p>{feedback}</p>
+          <button class="next" on:click={nextQuestion}>Next</button>
+        {/if}
       {:else}
         <h2>Game over</h2>
         <p>Your score: {score}/10</p>
