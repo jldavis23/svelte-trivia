@@ -12,6 +12,9 @@
   let isAnswered = false;
   let token;
 
+  $: console.log(questions);
+  $: console.log(feedback);
+
   onMount(async () => {
     try {
       const result = await fetch("https://opentdb.com/api_category.php");
@@ -22,9 +25,11 @@
     }
 
     try {
-      const result = await fetch("https://opentdb.com/api_token.php?command=request");
-      const data = await result.json()
-      token = data.token
+      const result = await fetch(
+        "https://opentdb.com/api_token.php?command=request"
+      );
+      const data = await result.json();
+      token = data.token;
     } catch (err) {
       console.log(err);
     }
@@ -44,7 +49,11 @@
       console.log(err);
     }
 
-    getAnswers(questions[qNumber]);
+    if (questions.length > 0) {
+      getAnswers(questions[qNumber]);
+    } else {
+      feedback = "no questions available in that category";
+    }
   };
 
   const getAnswers = (question) => {
@@ -60,8 +69,8 @@
   };
 
   const checkAnswer = (answer) => {
-    isAnswered = true
-    answer.isChosen = true
+    isAnswered = true;
+    answer.isChosen = true;
     if (answer.isCorrect === true) {
       feedback = "Correct!";
       score++;
@@ -71,7 +80,7 @@
   };
 
   const nextQuestion = () => {
-    isAnswered = false
+    isAnswered = false;
     feedback = null;
     qNumber++;
     if (qNumber < 10) {
@@ -80,9 +89,9 @@
   };
 
   const resetGame = () => {
-    questions = undefined
-    qNumber = 0
-  }
+    questions = undefined;
+    qNumber = 0;
+  };
 
   function htmlReplace(str) {
     return str
@@ -101,7 +110,7 @@
       .replaceAll("&Aaute;", "Á")
       .replaceAll("&shy;", "")
       .replaceAll("&iacute;", "í")
-      .replaceAll("&Iacute;", "Í")
+      .replaceAll("&Iacute;", "Í");
   }
 </script>
 
@@ -127,28 +136,39 @@
     </form>
   {:else}
     <div>
-      {#if qNumber < 10}
-        <p>Question {qNumber + 1} of 10</p>
-        <h2>{htmlReplace(questions[qNumber].question)}</h2>
-        <div class="answer-buttons">
-          {#each answers as answer}
-            {#if isAnswered}
-              <button class="isAnswered" class:btn-correct={answer.isCorrect} class:btn-incorrect={!answer.isCorrect} class:btn-chosen={answer.isChosen}>{htmlReplace(answer.text)}</button>
-            {:else}
-              <button on:click={() => checkAnswer(answer)}
-                >{htmlReplace(answer.text)}</button
-              >
-            {/if}
-          {/each}
-        </div>
-        {#if feedback}
-          <p>{feedback}</p>
-          <button class="next" on:click={nextQuestion}>Next</button>
+      {#if questions.length > 0}
+        {#if qNumber < 10}
+          <p>Question {qNumber + 1} of 10</p>
+          <h2>{htmlReplace(questions[qNumber].question)}</h2>
+          <div class="answer-buttons">
+            {#each answers as answer}
+              {#if isAnswered}
+                <button
+                  class="isAnswered"
+                  class:btn-correct={answer.isCorrect}
+                  class:btn-incorrect={!answer.isCorrect}
+                  class:btn-chosen={answer.isChosen}
+                  >{htmlReplace(answer.text)}</button
+                >
+              {:else}
+                <button on:click={() => checkAnswer(answer)}
+                  >{htmlReplace(answer.text)}</button
+                >
+              {/if}
+            {/each}
+          </div>
+          {#if feedback}
+            <p>{feedback}</p>
+            <button class="next" on:click={nextQuestion}>Next</button>
+          {/if}
+        {:else}
+          <h2>Game over</h2>
+          <p>Your score: {score}/10</p>
+          <button class="lets-play" on:click={resetGame}>Play Again</button>
         {/if}
       {:else}
-        <h2>Game over</h2>
-        <p>Your score: {score}/10</p>
-        <button class="lets-play" on:click={resetGame}>Play Again</button>
+          {feedback}
+          <button class="lets-play" on:click={resetGame}>Try Again</button>
       {/if}
     </div>
   {/if}
