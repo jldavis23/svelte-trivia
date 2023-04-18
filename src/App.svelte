@@ -1,7 +1,5 @@
 <script>
   import { onMount } from "svelte";
-  import { dataset_dev } from "svelte/internal";
-  import { get } from "svelte/store";
 
   let categories = [];
   let chosenDifficulty;
@@ -32,7 +30,7 @@
         `https://opentdb.com/api.php?amount=10&category=${chosenCategory}&difficulty=${chosenDifficulty}&type=multiple`
       );
       const data = await result.json();
-      questions = data.results;
+      questions = await data.results;
     } catch (err) {
       console.log(err);
     }
@@ -71,6 +69,11 @@
       getAnswers(questions[qNumber]);
     }
   };
+
+  const resetGame = () => {
+    questions = undefined
+    qNumber = 0
+  }
 
   function htmlReplace(str) {
     return str
@@ -134,6 +137,7 @@
       {:else}
         <h2>Game over</h2>
         <p>Your score: {score}/10</p>
+        <button class="lets-play" on:click={resetGame}>Play Again</button>
       {/if}
     </div>
   {/if}
