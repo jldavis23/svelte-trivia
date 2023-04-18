@@ -57,11 +57,25 @@
       getAnswers(questions[qNumber]);
     }
   };
+
+  function htmlUnescape(str) {
+    return str
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#039;', "'")  
+        .replaceAll('&rsquo;', "'") 
+        .replaceAll('&amp;', "'")
+        .replaceAll('&oacute;', "ó")
+        .replaceAll('&Oacute;', "Ó")
+        .replaceAll('&hellip;', '…')
+        .replaceAll('&ldquo;', '"')
+        .replaceAll('&rdquo;', '"')
+        .replaceAll('&Eacute;', 'É')
+        .replaceAll('&eacute;', 'é')
+}
 </script>
 
 <main>
   <h1>Trivia!</h1>
-
   {#if !questions}
     <form on:submit|preventDefault={startGame}>
       <label for="difficulty">Choose difficulty:</label>
@@ -83,16 +97,16 @@
   {:else}
     <div>
       {#if qNumber < 10}
-        <h2>{questions[qNumber].question}</h2>
+        <h2>{htmlUnescape(questions[qNumber].question)}</h2>
         <div>
           {#each answers as answer}
-            <button on:click={() => checkAnswer(answer)}>{answer}</button>
+            <button on:click={() => checkAnswer(answer)}>{htmlUnescape(answer)}</button>
           {/each}
         </div>
         <p>Question {qNumber + 1} of 10</p>
       {:else}
         <h2>Game over</h2>
-        <p>Your score: {score}</p>
+        <p>Your score: {score}/10</p>
       {/if}
     </div>
   {/if}
