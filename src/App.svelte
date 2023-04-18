@@ -110,7 +110,8 @@
       .replaceAll("&Aaute;", "Á")
       .replaceAll("&shy;", "")
       .replaceAll("&iacute;", "í")
-      .replaceAll("&Iacute;", "Í");
+      .replaceAll("&Iacute;", "Í")
+      .replaceAll("&luml;", "Ï")
   }
 </script>
 
