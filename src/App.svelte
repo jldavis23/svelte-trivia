@@ -1,16 +1,15 @@
 <script>
   import { onMount } from "svelte";
   import { dataset_dev } from "svelte/internal";
-    import { get } from "svelte/store";
+  import { get } from "svelte/store";
 
   let categories = [];
   let chosenDifficulty;
   let chosenCategory;
   let questions;
   let qNumber = 0;
-  let answers = []
-
-  $: console.log(questions)
+  let answers = [];
+  let score = 0;
 
   onMount(async () => {
     try {
@@ -36,26 +35,28 @@
       console.log(err);
     }
 
-    getAnswers(questions[qNumber])
+    getAnswers(questions[qNumber]);
   };
 
   const getAnswers = (question) => {
-    answers = question.incorrect_answers
+    answers = question.incorrect_answers;
     const randomIndex = Math.floor(Math.random() * (answers.length + 1));
 
-    answers.splice(randomIndex, 0, question.correct_answer)
-  }
+    answers.splice(randomIndex, 0, question.correct_answer);
+  };
 
   const checkAnswer = (answer) => {
     if (answer === questions[qNumber].correct_answer) {
-      console.log('correct!')
+      console.log("correct!");
+      score++;
     } else {
-      console.log('incorrect...')
+      console.log("incorrect...");
     }
-    qNumber++
-    getAnswers(questions[qNumber])
-  }
-
+    qNumber++;
+    if (qNumber < 10) {
+      getAnswers(questions[qNumber]);
+    }
+  };
 </script>
 
 <main>
@@ -81,12 +82,18 @@
     </form>
   {:else}
     <div>
-      <h2>{questions[qNumber].question}</h2>
-      <div>
-        {#each answers as answer}
-          <button on:click={() => checkAnswer(answer)}>{answer}</button>
-        {/each}
-      </div>
+      {#if qNumber < 10}
+        <h2>{questions[qNumber].question}</h2>
+        <div>
+          {#each answers as answer}
+            <button on:click={() => checkAnswer(answer)}>{answer}</button>
+          {/each}
+        </div>
+        <p>Question {qNumber + 1} of 10</p>
+      {:else}
+        <h2>Game over</h2>
+        <p>Your score: {score}</p>
+      {/if}
     </div>
   {/if}
 </main>
