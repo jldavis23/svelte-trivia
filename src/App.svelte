@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { dataset_dev } from "svelte/internal";
+    import { get } from "svelte/store";
 
   let categories = [];
   let chosenDifficulty;
@@ -34,9 +35,27 @@
     } catch (err) {
       console.log(err);
     }
+
+    getAnswers(questions[qNumber])
   };
 
-  
+  const getAnswers = (question) => {
+    answers = question.incorrect_answers
+    const randomIndex = Math.floor(Math.random() * (answers.length + 1));
+
+    answers.splice(randomIndex, 0, question.correct_answer)
+  }
+
+  const checkAnswer = (answer) => {
+    if (answer === questions[qNumber].correct_answer) {
+      console.log('correct!')
+    } else {
+      console.log('incorrect...')
+    }
+    qNumber++
+    getAnswers(questions[qNumber])
+  }
+
 </script>
 
 <main>
@@ -63,7 +82,11 @@
   {:else}
     <div>
       <h2>{questions[qNumber].question}</h2>
-
+      <div>
+        {#each answers as answer}
+          <button on:click={() => checkAnswer(answer)}>{answer}</button>
+        {/each}
+      </div>
     </div>
   {/if}
 </main>
