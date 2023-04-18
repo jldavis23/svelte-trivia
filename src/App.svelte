@@ -10,12 +10,21 @@
   let score = 0;
   let feedback = null;
   let isAnswered = false;
+  let token;
 
   onMount(async () => {
     try {
       const result = await fetch("https://opentdb.com/api_category.php");
       const data = await result.json();
       categories = data.trivia_categories;
+    } catch (err) {
+      console.log(err);
+    }
+
+    try {
+      const result = await fetch("https://opentdb.com/api_token.php?command=request");
+      const data = await result.json()
+      token = data.token
     } catch (err) {
       console.log(err);
     }
@@ -27,7 +36,7 @@
 
     try {
       const result = await fetch(
-        `https://opentdb.com/api.php?amount=10&category=${chosenCategory}&difficulty=${chosenDifficulty}&type=multiple`
+        `https://opentdb.com/api.php?amount=10&category=${chosenCategory}&difficulty=${chosenDifficulty}&type=multiple&token=${token}`
       );
       const data = await result.json();
       questions = await data.results;
@@ -90,7 +99,9 @@
       .replaceAll("&eacute;", "é")
       .replaceAll("&aacute;", "á")
       .replaceAll("&Aaute;", "Á")
-      .replaceAll("&shy;", "");
+      .replaceAll("&shy;", "")
+      .replaceAll("&iacute;", "í")
+      .replaceAll("&Iacute;", "Í")
   }
 </script>
 
